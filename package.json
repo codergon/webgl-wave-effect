@@ -1,0 +1,23 @@
+{
+  "name": "vite-base",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "yarn dev",
+    "dev": "vite src --port 3000",
+    "build": "vite build src",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^4.2.0",
+    "sass": "^1.62.0"
+  },
+  "dependencies": {
+    "auto-bind": "^5.0.1",
+    "events": "^3.3.0",
+    "gsap": "^3.11.5",
+    "lodash": "^4.17.21",
+    "prefix": "^1.0.0"
+  }
+}

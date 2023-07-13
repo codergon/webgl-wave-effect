@@ -1,0 +1,10 @@
+// sans
+@mixin title120Mobile {
+  font-size: 64px;
+  letter-spacing: calc(-0.035 * 64px);
+  line-height: 1;
+}
+
+%title-64 {
+  @include title120Mobile;
+}

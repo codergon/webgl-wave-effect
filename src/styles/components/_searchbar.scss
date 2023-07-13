@@ -1,0 +1,18 @@
+.c-search-bar {
+  @extend %base-input;
+
+  &__icon {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    @extend %row-middle;
+    height: calc(100% - 4px);
+    background: rgba($color: $secondary, $alpha: 0.07);
+    svg {
+      fill: $secondary;
+      width: 17px;
+      height: 17px;
+      stroke: $secondary;
+      stroke-width: 0.3px;
+    }
+  }
+}
