@@ -17,7 +17,7 @@ void main() {
 	
     float c = circle(newUV, uMouse, 0.0, 0.1 + uVelo * 2.) * 40. * uVelo;
     vec2 warpedUV = mix(vUv, uMouse, c * 0.99); //power
-    color = texture2D(tDiffuse, warpedUV) + texture2D(tDiffuse, warpedUV) * vec4(vec3(c), 1.);
+    color = texture2D(tDiffuse, warpedUV); 
 
     gl_FragColor = color;
 }

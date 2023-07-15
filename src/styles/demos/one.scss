@@ -11,12 +11,12 @@
     position: relative;
 
     &__figure {
-      $length: 4;
+      $length: 5;
       $spacing: calc(min(2rem, 20px));
       $width: calc((100% - ($spacing * 4)) / $length);
 
       width: $width;
-      aspect-ratio: 1;
+      aspect-ratio: 1 / 1;
       position: absolute;
       @for $i from 1 through $length {
         &:nth-child(#{$i}) {

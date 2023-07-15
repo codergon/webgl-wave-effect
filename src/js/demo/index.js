@@ -9,6 +9,15 @@ import postfragment from "../shaders/postfragment.glsl";
 
 export default class One {
   constructor() {
+    this.scroll = {
+      ease: 0.05,
+      current: 0,
+      target: 0,
+      last: 0,
+    };
+
+    this.speed = 2;
+
     this.mouse = new THREE.Vector2();
 
     this.createRenderer();
@@ -157,10 +166,13 @@ export default class One {
    * Update.
    */
   update() {
-    // this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.camera);
+    if (this.medias) {
+      this.medias.forEach(media => media.update(this.scroll, this.direction));
+    }
 
-    this.customPass.uniforms.uMouse.value = this.mouse;
-    if (this.composer) this.composer.render();
+    // this.customPass.uniforms.uMouse.value = this.mouse;
+    // if (this.composer) this.composer.render();
 
     window.requestAnimationFrame(this.update.bind(this));
   }

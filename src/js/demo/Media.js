@@ -55,7 +55,6 @@ export default class {
 
     this.updateScale();
     this.updateX();
-    this.updateY();
 
     this.mesh.material.uniforms.uPlaneSizes.value = [
       this.mesh.scale.x,
@@ -77,18 +76,16 @@ export default class {
       ((this.bounds.left - x) / this.screen.width) * this.viewport.width;
   }
 
-  updateY(y = 0) {
-    this.mesh.position.y =
-      this.viewport.height / 2 -
-      this.mesh.scale.y / 2 -
-      ((this.bounds.top - y) / this.screen.height) * this.viewport.height -
-      this.extra;
-  }
-
   update(y) {
+    y = {
+      current: 100,
+      last: 10,
+    };
+
     this.updateScale();
     this.updateX();
-    this.updateY(y);
+
+    this.mesh.material.uniforms.uStrength.value = -0.8;
   }
 
   /**
