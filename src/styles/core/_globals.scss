@@ -1,8 +1,7 @@
 html {
+  width: 100vw;
   box-sizing: border-box;
-  font-size: calc(100vw / 1440 * 10);
-  width: 100%;
-
+  font-size: calc((100vw / 1440) * 10);
   @include media(">desktop") {
     font-size: 10px;
   }
@@ -16,12 +15,16 @@ body {
 }
 
 body {
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100%;
-  font-family: "DMSans", sans-serif;
+  color: $white;
+  position: fixed;
   font-size: 16px;
   font-weight: 500;
   line-height: 1.35;
-  background: $white;
-  color: $black;
+  font-family: $font-sans;
+  background: $background;
   font-feature-settings: "case" on;
 }

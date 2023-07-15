@@ -15,7 +15,7 @@
   }
 }
 
-@mixin LGdesktop {
+@mixin desktopLg {
   @media (max-width: 1920px) {
     @content;
   }
