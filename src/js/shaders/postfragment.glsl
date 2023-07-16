@@ -1,23 +1,25 @@
 varying vec2 vUv;
-uniform vec2 uMouse;
-uniform float uVelo;
-uniform vec2 resolution;
-uniform sampler2D tDiffuse;
+varying float normalizedX;
 
-float circle(vec2 uv, vec2 disc_center, float disc_radius, float border_size) {
-    uv -= disc_center;
-    uv *= resolution;
-    float dist = length(uv);
-    return smoothstep(disc_radius + border_size, disc_radius - border_size, dist);
-}
+uniform float uCursor;
+uniform float uImgWidth;
+uniform sampler2D tDiffuse;
+uniform vec2 uViewportSizes;
+
 
 void main() {
-    vec2 newUV = vUv;
-    vec4 color = vec4(1., 0., 0., 1.);
-	
-    float c = circle(newUV, uMouse, 0.0, 0.1 + uVelo * 2.) * 40. * uVelo;
-    vec2 warpedUV = mix(vUv, uMouse, c * 0.99); //power
-    color = texture2D(tDiffuse, warpedUV); 
+    vec4 texColor = texture2D(tDiffuse, vUv);
+    vec3 grayColor = vec3(dot(texColor.rgb, vec3(0.2989, 0.587, 0.114))); 
 
-    gl_FragColor = color;
+    float effectW = (uImgWidth / uViewportSizes.x) / 2.;
+
+    vec3 waveColor = texColor.rgb;
+    if (vUv.x > (0.5 - effectW + uCursor) && vUv.x < (effectW + uCursor + 0.5)) {
+        waveColor = texColor.rgb;
+    } else {
+        waveColor = grayColor;
+    }
+
+    gl_FragColor.rgb = waveColor;
+    gl_FragColor.a = 1.0;
 }

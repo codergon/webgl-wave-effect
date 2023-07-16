@@ -3,22 +3,22 @@
 precision highp float;
 precision highp int;
 
+uniform float uCursor;
 uniform float uStrength;
+uniform float uImgWidth;
 uniform vec2 uViewportSizes;
-// uniform float cursor; // New variable for controlling the center of the effect
 
 varying vec2 vUv;
 
 void main() {
    vec4 newPosition = modelViewMatrix * vec4(position, 1.0);
 
-   float cursor = 0.1;
-   float range = 0.175;
+   float effectW = uImgWidth;
 
    float normalizedX = newPosition.x / uViewportSizes.x;
 
-  if (normalizedX > (-range + cursor) && normalizedX < (range + cursor)) {
-    normalizedX = (normalizedX - cursor) / (range * 2.0);
+  if (normalizedX > (-effectW + uCursor) && normalizedX < (effectW + uCursor)) {
+    normalizedX = (normalizedX - uCursor) / (effectW * 2.0);
     newPosition.z += sin(normalizedX * PI + PI / 2.0) * -uStrength;
   }
 

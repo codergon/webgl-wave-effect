@@ -1,3 +1,0 @@
-export const BREAKPOINT_PHONE = 430;
-export const BREAKPOINT_TABLET = 760;
-export const BREAKPOINT_DESKTOP = 1440;

@@ -4,20 +4,23 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 
 import Media from "./Media";
+import { lerp } from "../utils/math";
 import postvertex from "../shaders/postvertex.glsl";
 import postfragment from "../shaders/postfragment.glsl";
 
 export default class One {
   constructor() {
     this.scroll = {
-      ease: 0.05,
       current: 0,
       target: 0,
-      last: 0,
+      ease: 0.1,
     };
 
     this.speed = 2;
-
+    this.cursor = 0.0;
+    this.imgWidth = 0.0;
+    this.strength = 0.6;
+    this.widthMultiplier = 1.0;
     this.mouse = new THREE.Vector2();
 
     this.createRenderer();
@@ -35,37 +38,6 @@ export default class One {
     this.update();
 
     this.addEventListeners();
-  }
-
-  // Post processing
-  initPostProcessing() {
-    // Create EffectComposer and passes
-    this.composer = new EffectComposer(this.renderer);
-    const renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderPass);
-
-    //custom shader pass
-    var myEffect = {
-      uniforms: {
-        tDiffuse: { value: null },
-        resolution: {
-          value: new THREE.Vector2(1, window.innerHeight / window.innerWidth),
-        },
-        uMouse: { value: new THREE.Vector2(-10, -10) },
-        uVelo: { value: 0.05 },
-      },
-      vertexShader: postvertex,
-      fragmentShader: postfragment,
-    };
-
-    this.customPass = new ShaderPass(myEffect);
-    this.customPass.renderToScreen = true;
-    this.composer.addPass(this.customPass);
-  }
-
-  onMouseMove(event) {
-    this.mouse.x = event.clientX / window.innerWidth;
-    this.mouse.y = 1 - event.clientY / window.innerHeight;
   }
 
   // Renderer
@@ -107,13 +79,37 @@ export default class One {
 
   createMedias() {
     this.mediasElements = document.querySelectorAll(".gallery__figure");
+
+    this.imgWidth = this.mediasElements[0].querySelector("img").clientWidth;
+
     this.medias = Array.from(this.mediasElements).map(element => {
+      element.addEventListener("click", () => {
+        const imgcenter =
+          element.getBoundingClientRect().left + this.imgWidth / 2;
+        const moveTo = imgcenter / window.innerWidth - 0.5;
+
+        console.log(moveTo);
+
+        if (
+          Math.round(moveTo * 100) / 100 ===
+          Math.round(this.scroll.target * 100) / 100
+        )
+          return;
+
+        this.strength = 0.6;
+        this.widthMultiplier = 1.2;
+        this.scroll.target = moveTo;
+      });
+
       let media = new Media({
         element,
+        imgWidth: this.imgWidth,
         geometry: this.planeGeometry,
         scene: this.scene,
         screen: this.screen,
+        strength: this.strength,
         viewport: this.viewport,
+        cursor: this.cursor,
       });
 
       return media;
@@ -121,9 +117,64 @@ export default class One {
   }
 
   /**
-   * Wheel.
+   * Post Processing.
    */
-  onWheel(event) {}
+  initPostProcessing() {
+    // Create EffectComposer and passes
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    //custom shader pass
+    var myEffect = {
+      uniforms: {
+        tDiffuse: { value: null },
+        uCursor: { value: this.cursor },
+        uImgWidth: { value: this.imgWidth },
+        uViewportSizes: { value: [this.viewport.width, this.viewport.height] },
+      },
+      vertexShader: postvertex,
+      fragmentShader: postfragment,
+    };
+
+    this.customPass = new ShaderPass(myEffect);
+    this.customPass.renderToScreen = true;
+    this.composer.addPass(this.customPass);
+  }
+
+  /**
+   * Update.
+   */
+  update() {
+    this.scroll.current = lerp(
+      this.scroll.current,
+      this.scroll.target,
+      this.scroll.ease
+    );
+
+    this.diff =
+      Math.round(Math.abs(this.scroll.current - this.scroll.target) * 1000) /
+      1000;
+
+    if (this.diff < 0.01) {
+      this.strength = lerp(this.strength, 0, 0.1);
+      this.widthMultiplier = lerp(this.widthMultiplier, 1, 0.1);
+    }
+
+    this.cursor = this.scroll.current;
+
+    if (this.medias)
+      this.medias.forEach(media => media.update(this.cursor, this.strength));
+
+    this.customPass.uniforms.uCursor.value = this.cursor;
+    this.customPass.uniforms.uImgWidth.value =
+      (this.imgWidth * this.widthMultiplier * this.viewport.width) /
+      this.screen.width;
+
+    if (this.composer) this.composer.render();
+
+    window.requestAnimationFrame(this.update.bind(this));
+  }
 
   /**
    * Resize.
@@ -133,6 +184,10 @@ export default class One {
       height: window.innerHeight,
       width: window.innerWidth,
     };
+
+    this.imgWidth = this.mediasElements
+      ? this.mediasElements[0].querySelector("img").clientWidth
+      : 0;
 
     this.renderer.setSize(this.screen.width, this.screen.height);
 
@@ -148,33 +203,38 @@ export default class One {
       width,
     };
 
+    if (this.customPass) {
+      this.customPass.uniforms.uViewportSizes.value = [
+        this.viewport.width,
+        this.viewport.height,
+      ];
+    }
+
     this.galleryBounds = this.gallery.getBoundingClientRect();
     this.galleryHeight =
       (this.viewport.height * this.galleryBounds.height) / this.screen.height;
 
     if (this.medias) {
       this.medias.forEach(media =>
-        media.onResize({
-          screen: this.screen,
-          viewport: this.viewport,
-        })
+        media.onResize(
+          {
+            screen: this.screen,
+            viewport: this.viewport,
+          },
+          this.imgWidth
+        )
       );
     }
   }
 
   /**
-   * Update.
+   * Events.
    */
-  update() {
-    this.renderer.render(this.scene, this.camera);
-    if (this.medias) {
-      this.medias.forEach(media => media.update(this.scroll, this.direction));
-    }
+  onMouseMove(event) {
+    this.mouse.x = event.clientX / window.innerWidth;
+    this.mouse.y = 1 - event.clientY / window.innerHeight;
 
-    // this.customPass.uniforms.uMouse.value = this.mouse;
-    // if (this.composer) this.composer.render();
-
-    window.requestAnimationFrame(this.update.bind(this));
+    // this.cursor = event.clientX / window.innerWidth - 0.5;
   }
 
   /**
@@ -182,10 +242,6 @@ export default class One {
    */
   addEventListeners() {
     window.addEventListener("resize", this.onResize.bind(this));
-
-    window.addEventListener("mousewheel", this.onWheel.bind(this));
-    window.addEventListener("wheel", this.onWheel.bind(this));
-
     window.addEventListener("mousemove", this.onMouseMove.bind(this));
   }
 }

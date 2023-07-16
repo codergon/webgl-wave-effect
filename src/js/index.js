@@ -5,19 +5,19 @@ const pageId = document.body.getAttribute("data-id");
 
 new pages[pageId]();
 
-// const images = document.querySelectorAll("img");
-// let imagesIndex = 0;
+const images = document.querySelectorAll("img");
+let imagesIndex = 0;
 
-// Array.from(images).forEach(element => {
-//   const image = new Image();
+Array.from(images).forEach(element => {
+  const image = new Image();
 
-//   image.src = element.src;
-//   image.onload = _ => {
-//     imagesIndex += 1;
+  image.src = element.src;
+  image.onload = _ => {
+    imagesIndex += 1;
 
-//     if (imagesIndex === images.length) {
-//       document.documentElement.classList.remove("loading");
-//       document.documentElement.classList.add("loaded");
-//     }
-//   };
-// });
+    if (imagesIndex === images.length) {
+      document.documentElement.classList.remove("loading");
+      document.documentElement.classList.add("loaded");
+    }
+  };
+});

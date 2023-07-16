@@ -3,14 +3,27 @@ import vertexShader from "../shaders/vertex.glsl";
 import fragmentShader from "../shaders/fragment.glsl";
 
 export default class {
-  constructor({ element, geometry, scene, screen, viewport }) {
+  constructor({
+    scene,
+    screen,
+    cursor,
+    element,
+    geometry,
+    viewport,
+    strength,
+    imgWidth,
+  }) {
     this.element = element;
     this.image = this.element.querySelector("img");
 
-    this.geometry = geometry;
+    this.cursor = cursor;
+    this.imgWidth = imgWidth;
+    this.strength = strength;
+
     this.scene = scene;
     this.screen = screen;
     this.viewport = viewport;
+    this.geometry = geometry;
 
     this.createMesh();
     this.createBounds();
@@ -37,8 +50,10 @@ export default class {
         tMap: { value: texture },
         uPlaneSizes: { value: [0, 0] },
         uImageSizes: { value: [0, 0] },
+        uCursor: { value: this.cursor },
+        uStrength: { value: -this.strength },
+        uImgWidth: { value: this.imgWidth / this.screen.width },
         uViewportSizes: { value: [this.viewport.width, this.viewport.height] },
-        uStrength: { value: 0 },
       },
       vertexShader,
       fragmentShader,
@@ -76,22 +91,18 @@ export default class {
       ((this.bounds.left - x) / this.screen.width) * this.viewport.width;
   }
 
-  update(y) {
-    y = {
-      current: 100,
-      last: 10,
-    };
-
+  update(cursor, strength) {
     this.updateScale();
     this.updateX();
 
-    this.mesh.material.uniforms.uStrength.value = -0.8;
+    this.mesh.material.uniforms.uStrength.value = -strength;
+    this.mesh.material.uniforms.uCursor.value = cursor;
   }
 
   /**
    * Events.
    */
-  onResize(sizes) {
+  onResize(sizes, imgWidth) {
     this.extra = 0;
 
     if (sizes) {
@@ -106,6 +117,9 @@ export default class {
           this.viewport.width,
           this.viewport.height,
         ];
+
+        this.mesh.material.uniforms.uImgWidth.value =
+          imgWidth / this.screen.width;
       }
     }
 
