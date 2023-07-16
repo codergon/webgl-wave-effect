@@ -4,7 +4,7 @@ export default {
   plugins: [glsl()],
   root: "src",
   build: {
-    outDir: "./dist",
+    outDir: "../dist",
     emptyOutDir: true,
   },
   envDir: "./",
